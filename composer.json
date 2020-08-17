@@ -1,0 +1,61 @@
+{
+    "authors": [
+        {
+            "name": "Peter Fox",
+            "email": "peter@tradecoverexchange.com",
+            "homepage": "https://tradecoverexchange.com",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "TradeCoverExchange\\GoogleCloudTaskLaravel\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TradeCoverExchange\\GoogleCloudTaskLaravel\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "description": "A Laravel Queue driver to interact with Google Cloud Tasks",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "TradeCoverExchange\\GoogleCloudTaskLaravel\\CloudTaskServiceProvider"
+            ]
+        }
+    },
+    "homepage": "https://github.com/tradecoverexchange/google-cloud-tasks-laravel",
+    "keywords": [
+        "Trade Cover Exchange",
+        "google cloud tasks",
+        "laravel",
+        "laravel queue driver",
+        "google cloud"
+    ],
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "name": "tradecoverexchange/google-cloud-tasks-laravel",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.3",
+        "google/cloud-tasks": ">=1.6",
+        "tradecoverexchange/google-cloud-jwt-validator": "^1.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.16",
+        "orchestra/testbench": "^5.0",
+        "phpunit/phpunit": "^9.0",
+        "psalm/plugin-laravel": "^1.2",
+        "vimeo/psalm": "^3.11"
+    },
+    "scripts": {
+        "psalm": "vendor/bin/psalm",
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+        "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes"
+    }
+}
