@@ -87,6 +87,8 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## About Us
 
+![Trade Cover Exchange](https://assets.tradecoverexchange.com/github/TradeCoverExchange_RGB_Logo_Outline_Stacked.png)
+
 [Trade Cover Exchange](https://tradecoverexchange.com) is a platform for insuring your trade
 with other companies, protecting you from instabilities in the supply chain.
 
@@ -101,6 +103,7 @@ using the issue tracker.
 ## Credits
 
 - [Peter Fox](https://github.com/peterfox)
+- [Kees van Bemmel](https://github.com/kees-tce)
 - [All Contributors](../../contributors)
 
 ## License

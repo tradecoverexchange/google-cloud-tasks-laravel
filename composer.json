@@ -5,6 +5,12 @@
             "email": "peter@tradecoverexchange.com",
             "homepage": "https://tradecoverexchange.com",
             "role": "Developer"
+        },
+        {
+            "name": "Kees van Bemmel",
+            "email": "kees@tradecoverexchange.com",
+            "homepage": "https://tradecoverexchange.com",
+            "role": "Developer"
         }
     ],
     "autoload": {
