@@ -6,6 +6,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Http\Response;
 use Illuminate\Queue\Worker;
 use Illuminate\Queue\WorkerOptions;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Events;
 use TradeCoverExchange\GoogleCloudTaskLaravel\GoogleCloudTasks;
 use TradeCoverExchange\GoogleCloudTaskLaravel\TaskFactory;
 
@@ -30,6 +31,9 @@ class CloudTasksController
         $task = $factory->make($connection);
 
         $dispatcher->subscribe($cloudTasks);
+        $dispatcher->dispatch(new Events\TaskStarted(
+            $task
+        ));
 
         $this->worker->runNextJob(
             $connection,
@@ -37,6 +41,14 @@ class CloudTasksController
             new WorkerOptions('google-cloud-tasks', 0, 128, 60, 3, 3)
         );
 
-        return $cloudTasks->getResponse() ?? new Response(Response::HTTP_INTERNAL_SERVER_ERROR);
+        $response = $cloudTasks->getResponse() ?? new Response(Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        $dispatcher->dispatch(new Events\TaskFinished(
+            $task,
+            $cloudTasks->getResult(),
+            $response
+        ));
+
+        return $response;
     }
 }

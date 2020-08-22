@@ -4,10 +4,15 @@ namespace TradeCoverExchange\GoogleCloudTaskLaravel\Tests;
 
 use Google\Cloud\Tasks\V2beta3\CloudTasksClient;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Event;
 use Mockery\MockInterface;
 use Orchestra\Testbench\TestCase as Orchestra;
+use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTask;
 use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTaskServiceProvider;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Events\TaskFinished;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Events\TaskStarted;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Factories\CloudTaskClientFactory;
+use TradeCoverExchange\GoogleCloudTaskLaravel\GoogleCloudTasks;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Tests\Dummy\JobDummy;
 use TradeCoverExchange\GoogleJwtVerifier\Laravel\AuthenticateByOidc;
 
@@ -53,6 +58,42 @@ class HttpTasksJobProcessingTest extends Orchestra
                 $body
             )
             ->assertOk();
+    }
+
+    public function testFiresTaskStartedAndTaskFinishedEvents()
+    {
+        Event::fake([TaskStarted::class, TaskFinished::class]);
+
+        $body = $this->makePayload(JobDummy::make());
+
+        $this
+            ->withoutExceptionHandling()
+            ->withHeader('X-CloudTasks-TaskName', '123')
+            ->withHeader('X-CloudTasks-QueueName', 'default')
+            ->withHeader('X-CloudTasks-TaskExecutionCount', 2)
+            ->postJson(
+                route(
+                    'google.tasks',
+                    ['connection' => 'http_cloud_tasks']
+                ),
+                $body
+            )
+            ->assertOk();
+
+        Event::assertDispatched(TaskStarted::class, function (TaskStarted $event) {
+            $this->assertInstanceOf(CloudTask::class, $event->task);
+
+            return true;
+        });
+
+        Event::assertDispatched(TaskFinished::class, function (TaskFinished $event) {
+            $this->assertInstanceOf(CloudTask::class, $event->task);
+            $this->assertInstanceOf(Response::class, $event->response);
+            $this->assertIsString($event->result);
+            $this->assertSame($event->result, GoogleCloudTasks::STATUS_PROCESSED);
+
+            return true;
+        });
     }
 
     public function testTellsGoogleCloudTheTaskFailedFromTooManyTries()

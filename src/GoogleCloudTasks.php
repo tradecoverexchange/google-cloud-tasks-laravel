@@ -9,11 +9,22 @@ use Illuminate\Queue\Failed\FailedJobProviderInterface;
 
 class GoogleCloudTasks
 {
+    public const STATUS_PROCESSED = 'processed';
+    public const STATUS_FAILED = 'failed';
+    public const STATUS_EXCEPTION_THROWN = 'exception_thrown';
+
+    /**
+     * @var Response|null
+     */
     protected $response = null;
     /**
      * @var FailedJobProviderInterface
      */
     private $failedJobProvider;
+    /**
+     * @var string|null
+     */
+    private $status = null;
 
     public function __construct(FailedJobProviderInterface $failedJobProvider)
     {
@@ -23,7 +34,7 @@ class GoogleCloudTasks
     /**
      * @return null|Response
      */
-    public function getResponse()
+    public function getResponse() : ?Response
     {
         return $this->response;
     }
@@ -46,6 +57,7 @@ class GoogleCloudTasks
     protected function jobFailed(Events\JobFailed $event)
     {
         $this->response = new Response($event->exception->getMessage(), Response::HTTP_ALREADY_REPORTED);
+        $this->status = self::STATUS_FAILED;
 
         $this->failedJobProvider->log(
             $event->connectionName,
@@ -58,6 +70,7 @@ class GoogleCloudTasks
     protected function jobExceptionOccurred(Events\JobExceptionOccurred $event)
     {
         if ($this->response === null) {
+            $this->status = self::STATUS_EXCEPTION_THROWN;
             $this->response = new Response($event->exception->getMessage(), Response::HTTP_BAD_REQUEST);
         }
     }
@@ -65,7 +78,13 @@ class GoogleCloudTasks
     protected function jobProcessed(Events\JobProcessed $event)
     {
         if ($this->response === null) {
+            $this->status = self::STATUS_PROCESSED;
             $this->response = new Response('Task completed successfully');
         }
+    }
+
+    public function getResult() : ?string
+    {
+        return $this->status;
     }
 }
