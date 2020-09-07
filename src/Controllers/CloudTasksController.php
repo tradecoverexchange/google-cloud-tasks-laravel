@@ -34,7 +34,7 @@ class CloudTasksController
         $this->worker->runNextJob(
             $connection,
             $task->queueName(),
-            new WorkerOptions(0, 128, 60, 3, 3)
+            new WorkerOptions('google-cloud-tasks', 0, 128, 60, 3, 3)
         );
 
         return $cloudTasks->getResponse() ?? new Response(Response::HTTP_INTERNAL_SERVER_ERROR);

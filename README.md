@@ -8,6 +8,8 @@ A Laravel Queue driver to interact with [Google Cloud Tasks](https://cloud.googl
 
 ## Installation
 
+Requires Laravel 8 and PHP 7.3 as a minimum.
+
 You can install the package via composer:
 
 ```bash
