@@ -2,6 +2,7 @@
 
 namespace TradeCoverExchange\GoogleCloudTaskLaravel;
 
+use Illuminate\Queue\QueueManager;
 use Illuminate\Queue\Worker;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -21,14 +22,6 @@ class CloudTaskServiceProvider extends ServiceProvider
             );
         }
 
-        $queueManager = $this->app->make('queue');
-        $queueManager->extend(Connectors\AppEngineConnector::DRIVER, function () {
-            return $this->app->make(Connectors\AppEngineConnector::class);
-        });
-        $queueManager->extend(Connectors\CloudTasksConnector::DRIVER, function () {
-            return $this->app->make(Connectors\CloudTasksConnector::class);
-        });
-
         $this->mapRoutes();
     }
 
@@ -41,6 +34,20 @@ class CloudTaskServiceProvider extends ServiceProvider
             });
 
         $this->app->singleton(GoogleCloudTasks::class);
+
+        // Queue Factory extension used to make the package compatible with other packages
+        // which might try to access the factory before the boot method of this service
+        // provider has been called.
+        $this->app->extend(QueueManager::class, function (QueueManager $queueManager) {
+            $queueManager->extend(Connectors\AppEngineConnector::DRIVER, function () {
+                return $this->app->make(Connectors\AppEngineConnector::class);
+            });
+            $queueManager->extend(Connectors\CloudTasksConnector::DRIVER, function () {
+                return $this->app->make(Connectors\CloudTasksConnector::class);
+            });
+
+            return $queueManager;
+        });
     }
 
     protected function mapRoutes()
