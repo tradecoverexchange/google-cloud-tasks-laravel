@@ -2,6 +2,8 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/tradecoverexchange/google-cloud-tasks-laravel.svg?style=flat-square)](https://packagist.org/packages/tradecoverexchange/google-cloud-tasks-laravel)
 [![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/tradecoverexchange/google-cloud-tasks-laravel/Tests?label=tests)](https://github.com/tradecoverexchange/google-cloud-tasks-laravel/actions?query=workflow%3ATests+branch%3Amaster)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tradecoverexchange/google-cloud-tasks-laravel/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tradecoverexchange/google-cloud-tasks-laravel/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/tradecoverexchange/google-cloud-tasks-laravel/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/tradecoverexchange/google-cloud-tasks-laravel/?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/tradecoverexchange/google-cloud-tasks-laravel.svg?style=flat-square)](https://packagist.org/packages/tradecoverexchange/google-cloud-tasks-laravel)
 
 A Laravel Queue driver to interact with [Google Cloud Tasks](https://cloud.google.com/tasks).
