@@ -47,7 +47,7 @@
     "name": "tradecoverexchange/google-cloud-tasks-laravel",
     "prefer-stable": true,
     "require": {
-        "php": "^7.3",
+        "php": "^7.3|^8.0",
         "google/cloud-tasks": ">=1.6",
         "kevinrob/guzzle-cache-middleware": "^3.3",
         "laravel/framework": "8.*",
@@ -58,8 +58,8 @@
         "friendsofphp/php-cs-fixer": "^2.16",
         "laravel/legacy-factories": "^1.0.4",
         "phpunit/phpunit": "^9.0",
-        "psalm/plugin-laravel": "^1.4",
-        "vimeo/psalm": "^3.11"
+        "vimeo/psalm": "^4.3",
+        "psalm/plugin-laravel": "^1.4"
     },
     "scripts": {
         "psalm": "vendor/bin/psalm",
