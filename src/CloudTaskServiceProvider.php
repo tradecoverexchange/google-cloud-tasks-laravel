@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Controllers\CloudTasksController;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Middlewares\CloudTasks;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Middlewares\ConfigureUrlGenerator;
 
 class CloudTaskServiceProvider extends ServiceProvider
 {
@@ -54,6 +55,6 @@ class CloudTaskServiceProvider extends ServiceProvider
     {
         Route::any('/_/google-tasks/{connection}', CloudTasksController::class)
             ->name('google.tasks')
-            ->middleware(CloudTasks::class);
+            ->middleware([CloudTasks::class, ConfigureUrlGenerator::class]);
     }
 }
