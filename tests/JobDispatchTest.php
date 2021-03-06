@@ -4,6 +4,7 @@ namespace TradeCoverExchange\GoogleCloudTaskLaravel\Tests;
 
 use Google\Cloud\Tasks\V2beta3\CloudTasksClient;
 use Google\Cloud\Tasks\V2beta3\Task;
+use Illuminate\Support\Facades\Config;
 use Mockery\MockInterface;
 use Orchestra\Testbench\TestCase as Orchestra;
 use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTaskServiceProvider;
@@ -12,24 +13,19 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\Tests\Dummy\JobDummy;
 
 class JobDispatchTest extends Orchestra
 {
+    protected $client;
+
     public function setUp(): void
     {
         parent::setUp();
 
         $this->mock(CloudTaskClientFactory::class, function (MockInterface $factory) {
-            $client = \Mockery::mock(CloudTasksClient::class);
-
-            $client->shouldReceive('createTask')
-                ->with(
-                    'projects/test/locations/europe-west1/queues/default',
-                    \Mockery::type(Task::class)
-                )
-                ->once();
+            $this->client = \Mockery::mock(CloudTasksClient::class);
 
             $factory->shouldReceive('make')
                 ->withAnyArgs()
                 ->once()
-                ->andReturn($client);
+                ->andReturn($this->client);
         });
 
         $this->withFactories(__DIR__.'/database/factories');
@@ -37,18 +33,66 @@ class JobDispatchTest extends Orchestra
 
     public function testCanDispatchToHttpQueue()
     {
+        $this->client->shouldReceive('createTask')
+            ->withArgs(function (string $project, Task $task) {
+                $this->assertSame('projects/test/locations/europe-west1/queues/default', $project);
+                $this->assertInstanceOf(Task::class, $task);
+                $this->assertSame(
+                    'https://localhost/_/google-tasks/http_cloud_tasks',
+                    $task->getHttpRequest()->getUrl()
+                );
+
+                return true;
+            })
+            ->once();
+
+        dispatch(new JobDummy())
+            ->onConnection('http_cloud_tasks');
+    }
+
+    public function testCanDispatchToHttpQueueToConfiguredDomain()
+    {
+        Config::set('queue.connections.http_cloud_tasks.domain', 'test.tradecoverexchange.com');
+
+        $this->client->shouldReceive('createTask')
+            ->withArgs(function (string $project, Task $task) {
+                $this->assertSame('projects/test/locations/europe-west1/queues/default', $project);
+                $this->assertInstanceOf(Task::class, $task);
+                $this->assertSame(
+                    'https://test.tradecoverexchange.com/_/google-tasks/http_cloud_tasks',
+                    $task->getHttpRequest()->getUrl()
+                );
+
+                return true;
+            })
+            ->once();
+
         dispatch(new JobDummy())
             ->onConnection('http_cloud_tasks');
     }
 
     public function testCanDispatchToAppEngineQueue()
     {
+        $this->client->shouldReceive('createTask')
+            ->with(
+                'projects/test/locations/europe-west1/queues/default',
+                \Mockery::type(Task::class)
+            )
+            ->once();
+
         dispatch(new JobDummy())
             ->onConnection('app_engine_tasks');
     }
 
     public function testCanDispatchWithDelay()
     {
+        $this->client->shouldReceive('createTask')
+            ->with(
+                'projects/test/locations/europe-west1/queues/default',
+                \Mockery::type(Task::class)
+            )
+            ->once();
+
         dispatch(new JobDummy())
             ->onConnection('app_engine_tasks')
             ->delay(3000);

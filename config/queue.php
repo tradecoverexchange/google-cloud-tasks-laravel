@@ -57,6 +57,7 @@ return [
                 'credentials' => 'path/to/your/keyfile',
                 'transport' => 'rest',
             ],
+            'domain' => env('GOOGLE_CLOUD_TASKS_DOMAIN'),
         ],
     ],
 
