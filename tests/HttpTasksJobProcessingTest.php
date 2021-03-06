@@ -4,6 +4,7 @@ namespace TradeCoverExchange\GoogleCloudTaskLaravel\Tests;
 
 use Google\Cloud\Tasks\V2beta3\CloudTasksClient;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Mockery\MockInterface;
 use Orchestra\Testbench\TestCase as Orchestra;
@@ -14,6 +15,7 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\Events\TaskStarted;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Factories\CloudTaskClientFactory;
 use TradeCoverExchange\GoogleCloudTaskLaravel\GoogleCloudTasks;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Tests\Dummy\JobDummy;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Tests\Dummy\JobUrlGeneration;
 use TradeCoverExchange\GoogleJwtVerifier\Laravel\AuthenticateByOidc;
 
 class HttpTasksJobProcessingTest extends Orchestra
@@ -58,6 +60,29 @@ class HttpTasksJobProcessingTest extends Orchestra
                 $body
             )
             ->assertOk();
+    }
+
+    public function testUrlMiddlewareAllowsForUrlGeneration()
+    {
+        $body = $this->makePayload(JobUrlGeneration::make());
+
+        Cache::forget('test-url');
+
+        $this
+            ->withoutExceptionHandling()
+            ->withHeader('X-CloudTasks-TaskName', '123')
+            ->withHeader('X-CloudTasks-QueueName', 'default')
+            ->withHeader('X-CloudTasks-TaskExecutionCount', 2)
+            ->postJson(
+                route(
+                    'google.tasks',
+                    ['connection' => 'http_cloud_tasks']
+                ),
+                $body
+            )
+            ->assertOk();
+
+        $this->assertSame('https://test.tradecoverexchange.com/test', Cache::get('test-url'));
     }
 
     public function testFiresTaskStartedAndTaskFinishedEvents()
@@ -196,6 +221,8 @@ class HttpTasksJobProcessingTest extends Orchestra
 
     public function getEnvironmentSetUp($app)
     {
+        $app['config']->set('app.url', 'https://test.tradecoverexchange.com/');
+
         $app['config']->set('database.default', 'sqlite');
         $app['config']->set('database.connections.sqlite', [
             'driver' => 'sqlite',
