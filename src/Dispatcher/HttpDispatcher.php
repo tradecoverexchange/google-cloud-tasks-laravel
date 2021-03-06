@@ -24,11 +24,6 @@ class HttpDispatcher implements Dispatcher
      * @var string
      */
     private $locationId;
-
-    /**
-     * @var string
-     */
-    private $serviceEmail;
     /**
      * @var RequestGenerator
      */
@@ -60,8 +55,13 @@ class HttpDispatcher implements Dispatcher
      * @param string $queue
      * @throws \Google\ApiCore\ApiException
      */
-    public function dispatch(string $name, string $connection, string $payload, ?int $scheduledAt = null, string $queue = 'default'): void
-    {
+    public function dispatch(
+        string $name,
+        string $connection,
+        string $payload,
+        ?int $scheduledAt = null,
+        string $queue = 'default'
+    ) : void {
         $httpRequest = $this->generator->forHttpHandler($payload, $connection);
 
         if ($this->authenticator) {

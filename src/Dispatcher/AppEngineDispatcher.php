@@ -44,8 +44,13 @@ class AppEngineDispatcher implements Dispatcher
      * @param string $queue
      * @throws \Google\ApiCore\ApiException
      */
-    public function dispatch(string $name, string $connection, string $payload, ?int $scheduledAt = null, string $queue = 'default') : void
-    {
+    public function dispatch(
+        string $name,
+        string $connection,
+        string $payload,
+        ?int $scheduledAt = null,
+        string $queue = 'default'
+    ) : void {
         $httpRequest = $this->generator->forAppEngine($payload, $connection);
 
         // Create a Cloud Task object.

@@ -222,8 +222,6 @@ class AppEngineJobProcessingTest extends Orchestra
         $app['config']->set('queue', require __DIR__ . '/../config/queue.php');
         $app['config']->set('queue.connections.app_engine_tasks.project_id', 'test');
         $app['config']->set('queue.connections.app_engine_tasks.location', 'europe-west1');
-        $app['config']->set('queue.connections.app_engine_tasks.project_id', 'test');
-        $app['config']->set('queue.connections.app_engine_tasks.location', 'europe-west1');
 
         $app['config']->set('queue.failed.database', 'sqlite');
 
