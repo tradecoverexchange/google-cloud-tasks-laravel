@@ -35,6 +35,7 @@ class CloudTasks
     {
         if (
             ($connection = $request->route()->parameter('connection')) &&
+            is_string($connection) &&
             ($config = $this->getConfig($connection))
         ) {
             if (

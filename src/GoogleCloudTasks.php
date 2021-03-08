@@ -2,7 +2,7 @@
 
 namespace TradeCoverExchange\GoogleCloudTaskLaravel;
 
-use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Events\Dispatcher as EventBus;
 use Illuminate\Http\Response;
 use Illuminate\Queue\Events;
 use Illuminate\Queue\Failed\FailedJobProviderInterface;
@@ -39,7 +39,7 @@ class GoogleCloudTasks
         return $this->response;
     }
 
-    public function subscribe(Dispatcher $dispatcher)
+    public function subscribe(EventBus $dispatcher)
     {
         $dispatcher->listen(Events\JobFailed::class, function (Events\JobFailed $event) {
             $this->jobFailed($event);
@@ -75,7 +75,7 @@ class GoogleCloudTasks
         }
     }
 
-    protected function jobProcessed(Events\JobProcessed $event)
+    protected function jobProcessed(/** @scrutinizer ignore-unused */ Events\JobProcessed $event)
     {
         if ($this->response === null) {
             $this->status = self::STATUS_PROCESSED;
