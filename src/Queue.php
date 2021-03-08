@@ -116,6 +116,7 @@ class Queue extends BaseQueue implements QueueContract
      * @param string|null $queue
      *
      * @return BaseJob|null
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function pop($queue = null)
     {
@@ -141,6 +142,10 @@ class Queue extends BaseQueue implements QueueContract
      */
     protected function createPayloadArray($job, $queue, $data = '')
     {
+        if (! is_object($job)) {
+            throw new InvalidArgumentException('Arguement $job is expected to be an object');
+        }
+
         return array_merge(parent::createPayloadArray($job, $queue, $data), [
             'id' => $this->getRandomId($job),
             'attempts' => 0,
@@ -172,13 +177,12 @@ class Queue extends BaseQueue implements QueueContract
     }
 
     /**
-     * @param $queue
-     * @param $payload
-     * @param $name
-     * @param DateInterval|DateTimeInterface|int|null $scheduledAt
-     *
+     * @param string $queue
+     * @param string $payload
+     * @param string $name
+     * @param int|null $scheduledAt
      */
-    protected function pushGoogleTask(string $queue, string $payload, $name, $scheduledAt = null)
+    protected function pushGoogleTask(string $queue, string $payload, string $name, ?int $scheduledAt = null)
     {
         $this->client->dispatch($name, $this->getConnectionName(), $payload, $scheduledAt, $queue);
     }
