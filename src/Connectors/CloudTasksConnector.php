@@ -7,7 +7,6 @@ use Illuminate\Queue\Connectors\ConnectorInterface;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Authenticator\OidcAuthenticator;
 use TradeCoverExchange\GoogleCloudTaskLaravel\DispatcherFactory;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Queue;
-use TradeCoverExchange\GoogleCloudTaskLaravel\RequestGenerator;
 use TradeCoverExchange\GoogleCloudTaskLaravel\TaskFactory;
 
 class CloudTasksConnector implements ConnectorInterface
@@ -19,25 +18,19 @@ class CloudTasksConnector implements ConnectorInterface
      */
     private $dispatcherFactory;
     /**
-     * @var RequestGenerator
-     */
-    private $generator;
-    /**
      * @var TaskFactory
      */
     private $taskFactory;
 
     public function __construct(
         DispatcherFactory $dispatcherFactory,
-        RequestGenerator $generator,
         TaskFactory $taskFactory
     ) {
         $this->dispatcherFactory = $dispatcherFactory;
-        $this->generator = $generator;
         $this->taskFactory = $taskFactory;
     }
 
-    public function connect(array $config) : QueueContract
+    public function connect(array $config): QueueContract
     {
         $authenticator = new OidcAuthenticator(
             $config['authentication']['service_account']

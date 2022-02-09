@@ -27,7 +27,7 @@ class TaskFactory
      * @return CloudTask
      * @throws BindingResolutionException
      */
-    public function make(string $connection) : CloudTask
+    public function make(string $connection): CloudTask
     {
         $config = $this->getConfig($connection);
 

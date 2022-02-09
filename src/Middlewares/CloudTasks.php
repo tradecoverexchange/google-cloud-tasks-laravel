@@ -56,7 +56,5 @@ class CloudTasks
         }
 
         abort(Response::HTTP_UNAUTHORIZED);
-
-        return $next($request);
     }
 }

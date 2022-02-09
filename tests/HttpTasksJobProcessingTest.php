@@ -34,7 +34,7 @@ class HttpTasksJobProcessingTest extends Orchestra
         });
 
         $this->app->singleton(AuthenticateByOidc::class, function () {
-            return new class {
+            return new class () {
                 public function handle($request, $next)
                 {
                     return $next($request);

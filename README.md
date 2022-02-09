@@ -1,16 +1,15 @@
 # Google Cloud Tasks Queue Driver for Laravel
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/tradecoverexchange/google-cloud-tasks-laravel.svg?style=flat-square)](https://packagist.org/packages/tradecoverexchange/google-cloud-tasks-laravel)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/tradecoverexchange/google-cloud-tasks-laravel/Tests?label=tests)](https://github.com/tradecoverexchange/google-cloud-tasks-laravel/actions?query=workflow%3ATests+branch%3Amaster)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/tradecoverexchange/google-cloud-tasks-laravel/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/tradecoverexchange/google-cloud-tasks-laravel/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/tradecoverexchange/google-cloud-tasks-laravel/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/tradecoverexchange/google-cloud-tasks-laravel/?branch=master)
+[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/tradecoverexchange/google-cloud-tasks-laravel/run-tests?label=tests)](https://github.com/tradecoverexchange/google-cloud-tasks-laravel/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/workflow/status/tradecoverexchange/google-cloud-tasks-laravel/Check%20&%20fix%20styling?label=code%20style)](https://github.com/tradecoverexchange/google-cloud-tasks-laravel/actions?query=workflow%3A"Check+%26+fix+styling"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/tradecoverexchange/google-cloud-tasks-laravel.svg?style=flat-square)](https://packagist.org/packages/tradecoverexchange/google-cloud-tasks-laravel)
 
 A Laravel Queue driver to interact with [Google Cloud Tasks](https://cloud.google.com/tasks).
 
 ## Installation
 
-Requires Laravel 8 and PHP 7.3 as a minimum.
+Requires Laravel 8 and PHP 7.4 as a minimum.
 
 You can install the package via composer:
 

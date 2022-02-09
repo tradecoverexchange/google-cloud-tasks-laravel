@@ -23,7 +23,7 @@ class OAuthAuthenticator implements HttpRequestAuthenticator
         $this->scope = $scope;
     }
 
-    public function addAuthentication(HttpRequest $request) : HttpRequest
+    public function addAuthentication(HttpRequest $request): HttpRequest
     {
         return $request->setOauthToken(new OAuthToken(array_filter([
             'service_account_email' => $this->serviceAccountEmail,

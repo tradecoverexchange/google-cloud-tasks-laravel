@@ -6,5 +6,5 @@ use Google\Cloud\Tasks\V2beta3\HttpRequest;
 
 interface HttpRequestAuthenticator
 {
-    public function addAuthentication(HttpRequest $request) : HttpRequest;
+    public function addAuthentication(HttpRequest $request): HttpRequest;
 }

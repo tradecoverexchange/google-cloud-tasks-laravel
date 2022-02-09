@@ -27,7 +27,7 @@ class CloudTasksController
         TaskFactory $factory,
         Dispatcher $dispatcher,
         string $connection
-    ) : Response {
+    ): Response {
         $task = $factory->make($connection);
 
         $dispatcher->subscribe($cloudTasks);

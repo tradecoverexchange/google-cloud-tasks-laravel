@@ -46,19 +46,19 @@ class HttpCloudTask implements CloudTask
         );
     }
 
-    public function previousResponseStatusCode() : ?int
+    public function previousResponseStatusCode(): ?int
     {
         return $this->request->hasHeader('X-CloudTasks-TaskPreviousResponse') ?
             (int) $this->request->header('X-CloudTasks-TaskPreviousResponse') :
             null;
     }
 
-    public function retryReason() : string
+    public function retryReason(): string
     {
         return (string) $this->request->header('X-CloudTasks-TaskRetryReason');
     }
 
-    public function payload() : string
+    public function payload(): string
     {
         return (string) $this->request->getContent();
     }

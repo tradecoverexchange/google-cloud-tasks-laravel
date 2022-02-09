@@ -27,7 +27,7 @@ class DispatcherFactory
         string $projectId,
         string $location,
         array $clientOptions
-    ) :  Dispatcher {
+    ): Dispatcher {
         return new AppEngineDispatcher(
             $this->factory->make($clientOptions),
             $this->generator,
@@ -41,7 +41,7 @@ class DispatcherFactory
         string $location,
         array $clientOptions,
         HttpRequestAuthenticator $authenticator
-    ) : Dispatcher {
+    ): Dispatcher {
         return new HttpDispatcher(
             $this->factory->make($clientOptions),
             $this->generator,

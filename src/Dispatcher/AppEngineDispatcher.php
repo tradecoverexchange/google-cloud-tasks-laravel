@@ -50,7 +50,7 @@ class AppEngineDispatcher implements Dispatcher
         string $payload,
         ?int $scheduledAt = null,
         string $queue = 'default'
-    ) : void {
+    ): void {
         $httpRequest = $this->generator->forAppEngine($payload, $connection);
 
         // Create a Cloud Task object.

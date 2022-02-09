@@ -6,7 +6,6 @@ use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Connectors\ConnectorInterface;
 use TradeCoverExchange\GoogleCloudTaskLaravel\DispatcherFactory;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Queue;
-use TradeCoverExchange\GoogleCloudTaskLaravel\RequestGenerator;
 use TradeCoverExchange\GoogleCloudTaskLaravel\TaskFactory;
 
 class AppEngineConnector implements ConnectorInterface
@@ -18,22 +17,17 @@ class AppEngineConnector implements ConnectorInterface
      */
     private $dispatcherFactory;
     /**
-     * @var RequestGenerator
-     */
-    private $generator;
-    /**
      * @var TaskFactory
      */
     private $taskFactory;
 
-    public function __construct(DispatcherFactory $dispatcherFactory, RequestGenerator $generator, TaskFactory $taskFactory)
+    public function __construct(DispatcherFactory $dispatcherFactory, TaskFactory $taskFactory)
     {
         $this->dispatcherFactory = $dispatcherFactory;
-        $this->generator = $generator;
         $this->taskFactory = $taskFactory;
     }
 
-    public function connect(array $config) : QueueContract
+    public function connect(array $config): QueueContract
     {
         return new Queue(
             $this->dispatcherFactory->makeAppEngineDispatcher(

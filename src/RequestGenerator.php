@@ -7,7 +7,6 @@ use Google\Cloud\Tasks\V2beta3\HttpMethod;
 use Google\Cloud\Tasks\V2beta3\HttpRequest;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Http\Request;
 
 class RequestGenerator
 {
@@ -18,22 +17,17 @@ class RequestGenerator
      */
     private $generator;
     /**
-     * @var Request
-     */
-    private $request;
-    /**
      * @var Container
      */
     private $container;
 
-    public function __construct(UrlGenerator $generator, Request $request, Container $container)
+    public function __construct(UrlGenerator $generator, Container $container)
     {
         $this->generator = $generator;
-        $this->request = $request;
         $this->container = $container;
     }
 
-    public function forAppEngine(string $payload, string $connection) : AppEngineHttpRequest
+    public function forAppEngine(string $payload, string $connection): AppEngineHttpRequest
     {
         return (new AppEngineHttpRequest())
             ->setHttpMethod(HttpMethod::POST)
@@ -47,7 +41,7 @@ class RequestGenerator
             );
     }
 
-    public function forHttpHandler(string $payload, string $connection) : HttpRequest
+    public function forHttpHandler(string $payload, string $connection): HttpRequest
     {
         return (new HttpRequest())
             ->setHttpMethod(HttpMethod::POST)
@@ -58,7 +52,7 @@ class RequestGenerator
             );
     }
 
-    protected function cloudTasksUrl($connection) : string
+    protected function cloudTasksUrl($connection): string
     {
         $config = $this->getConfig($connection);
 

@@ -61,7 +61,7 @@ class HttpDispatcher implements Dispatcher
         string $payload,
         ?int $scheduledAt = null,
         string $queue = 'default'
-    ) : void {
+    ): void {
         $httpRequest = $this->generator->forHttpHandler($payload, $connection);
 
         if ($this->authenticator) {

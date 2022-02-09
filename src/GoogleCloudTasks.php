@@ -34,7 +34,7 @@ class GoogleCloudTasks
     /**
      * @return null|Response
      */
-    public function getResponse() : ?Response
+    public function getResponse(): ?Response
     {
         return $this->response;
     }
@@ -83,7 +83,7 @@ class GoogleCloudTasks
         }
     }
 
-    public function getResult() : ?string
+    public function getResult(): ?string
     {
         return $this->status;
     }

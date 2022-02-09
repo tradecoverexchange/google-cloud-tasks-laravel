@@ -23,7 +23,7 @@ class OidcAuthenticator implements HttpRequestAuthenticator
         $this->audience = $audience;
     }
 
-    public function addAuthentication(HttpRequest $request) : HttpRequest
+    public function addAuthentication(HttpRequest $request): HttpRequest
     {
         return $request->setOidcToken(new OidcToken(array_filter([
             'service_account_email' => $this->serviceAccountEmail,

@@ -53,12 +53,12 @@ class AppEngineTask implements CloudTask
             null;
     }
 
-    public function retryReason() : string
+    public function retryReason(): string
     {
         return (string) $this->request->header('X-AppEngine-TaskRetryReason');
     }
 
-    public function payload() : string
+    public function payload(): string
     {
         return (string) $this->request->getContent();
     }

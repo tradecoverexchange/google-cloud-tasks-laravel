@@ -1,6 +1,5 @@
 <?php
 
-
 namespace TradeCoverExchange\GoogleCloudTaskLaravel;
 
 interface Dispatcher
@@ -11,5 +10,5 @@ interface Dispatcher
         string $payload,
         ?int $scheduledAt = null,
         string $queue = 'default'
-    ) : void;
+    ): void;
 }

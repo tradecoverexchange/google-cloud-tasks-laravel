@@ -207,7 +207,7 @@ class Queue extends BaseQueue implements QueueContract
             ! (is_int($delay) && $delay > 0)
         ) {
             $type = gettype($delay);
-            if (is_object($delay)) {
+            if (! is_int($delay)) {
                 $type = get_class($delay);
             }
 
