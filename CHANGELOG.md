@@ -2,11 +2,17 @@
 
 All notable changes to `google-cloud-tasks-laravel` will be documented in this file
 
+## Laravel 9 - 2022-02-09
+
+# Changes
+
+Upgrades to Laravel 9
+
 ## 0.3.0 - 2020-09-19
 
 - Adds `TaskStarted` and `TaskFinished` events.
 - Internal improvement to extending the QueueManager with the cloud tasks and app engine task
-drivers. 
+- drivers.
 
 ## 0.2.0 - 2020-09-15
 
