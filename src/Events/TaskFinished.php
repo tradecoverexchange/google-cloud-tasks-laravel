@@ -7,23 +7,7 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTask;
 
 class TaskFinished
 {
-    /**
-     * @var CloudTask
-     */
-    public $task;
-    /**
-     * @var string|null
-     */
-    public $result;
-    /**
-     * @var Response
-     */
-    public $response;
-
-    public function __construct(CloudTask $task, ?string $result, Response $response)
+    public function __construct(public CloudTask $task, public string|null $result, public Response $response)
     {
-        $this->task = $task;
-        $this->result = $result;
-        $this->response = $response;
     }
 }

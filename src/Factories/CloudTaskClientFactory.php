@@ -12,7 +12,7 @@ class CloudTaskClientFactory
      * @return CloudTasksClient
      * @throws ValidationException
      */
-    public function make(array $options)
+    public function make(array $options): CloudTasksClient
     {
         return new CloudTasksClient($options);
     }

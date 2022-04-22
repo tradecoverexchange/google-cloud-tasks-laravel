@@ -16,12 +16,12 @@ class JobUrlGeneration implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public static function make()
+    public static function make(): self
     {
         return new self();
     }
 
-    public function handle()
+    public function handle(): void
     {
         Cache::put('test-url', app()->make('url')->to('test'));
     }

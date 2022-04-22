@@ -16,7 +16,7 @@ interface CloudTask
 
     public function eta(): CarbonInterface;
 
-    public function previousResponseStatusCode(): ?int;
+    public function previousResponseStatusCode(): int|null;
 
     public function retryReason(): string;
 

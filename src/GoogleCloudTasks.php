@@ -13,33 +13,19 @@ class GoogleCloudTasks
     public const STATUS_FAILED = 'failed';
     public const STATUS_EXCEPTION_THROWN = 'exception_thrown';
 
-    /**
-     * @var Response|null
-     */
-    protected $response = null;
-    /**
-     * @var FailedJobProviderInterface
-     */
-    private $failedJobProvider;
-    /**
-     * @var string|null
-     */
-    private $status = null;
+    protected Response|null $response = null;
+    protected string|null $status = null;
 
-    public function __construct(FailedJobProviderInterface $failedJobProvider)
+    public function __construct(protected FailedJobProviderInterface $failedJobProvider)
     {
-        $this->failedJobProvider = $failedJobProvider;
     }
 
-    /**
-     * @return null|Response
-     */
-    public function getResponse(): ?Response
+    public function getResponse(): Response|null
     {
         return $this->response;
     }
 
-    public function subscribe(EventBus $dispatcher)
+    public function subscribe(EventBus $dispatcher): void
     {
         $dispatcher->listen(Events\JobFailed::class, function (Events\JobFailed $event) {
             $this->jobFailed($event);
@@ -54,7 +40,7 @@ class GoogleCloudTasks
         });
     }
 
-    protected function jobFailed(Events\JobFailed $event)
+    protected function jobFailed(Events\JobFailed $event): void
     {
         $this->response = new Response($event->exception->getMessage(), Response::HTTP_ALREADY_REPORTED);
         $this->status = self::STATUS_FAILED;
@@ -67,23 +53,28 @@ class GoogleCloudTasks
         );
     }
 
-    protected function jobExceptionOccurred(Events\JobExceptionOccurred $event)
+    protected function jobExceptionOccurred(Events\JobExceptionOccurred $event): void
     {
         if ($this->response === null) {
             $this->status = self::STATUS_EXCEPTION_THROWN;
-            $this->response = new Response($event->exception->getMessage(), Response::HTTP_BAD_REQUEST);
+            $this->response = new Response($event->exception->getMessage(), Response::HTTP_RESET_CONTENT);
         }
     }
 
-    protected function jobProcessed(/** @scrutinizer ignore-unused */ Events\JobProcessed $event)
+    protected function jobProcessed(Events\JobProcessed $event): void
     {
         if ($this->response === null) {
             $this->status = self::STATUS_PROCESSED;
-            $this->response = new Response('Task completed successfully');
+            if ($event->job->isReleased()) {
+                $this->response = new Response('Job released', Response::HTTP_PARTIAL_CONTENT);
+
+                return;
+            }
+            $this->response = new Response('', Response::HTTP_NO_CONTENT);
         }
     }
 
-    public function getResult(): ?string
+    public function getResult(): string|null
     {
         return $this->status;
     }

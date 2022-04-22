@@ -7,30 +7,24 @@ use Illuminate\Http\Request;
 
 class ConfigureUrlGenerator
 {
-    /**
-     * @var Container
-     */
-    protected $container;
-
-    public function __construct(Container $container)
+    public function __construct(protected Container $container)
     {
-        $this->container = $container;
     }
 
-    public function handle(Request $request, callable $next)
+    public function handle(Request $request, callable $next): mixed
     {
         // This is done to make the URL generator use the config `app.url` value for URL
         // generation, otherwise the domain of the incoming request would be used but in some applications
-        // this might be an issue as tasks are send to a different host.
+        // this might be an issue as tasks are sent to a different host.
 
         // Normally a queue process is run by the CLI, setting the request like this will
-        // make the URL generator behave similiar to how it would in CLI mode.
+        // make the URL generator behave similar to how it would in CLI mode.
         $this->container->make('url')->setRequest($this->makeRequest());
 
         return $next($request);
     }
 
-    protected function makeRequest()
+    protected function makeRequest(): Request
     {
         $uri = $this->container->make('config')->get('app.url', 'http://localhost');
 

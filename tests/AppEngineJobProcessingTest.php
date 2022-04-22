@@ -3,37 +3,39 @@
 namespace TradeCoverExchange\GoogleCloudTaskLaravel\Tests;
 
 use Google\Cloud\Tasks\V2beta3\CloudTasksClient;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Mockery\MockInterface;
 use Orchestra\Testbench\TestCase as Orchestra;
 use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTask;
 use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTaskServiceProvider;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Dispatchers\AppEngineDispatcher;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Events\TaskFinished;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Events\TaskStarted;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Factories\CloudTaskClientFactory;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Factories\DispatcherFactory;
 use TradeCoverExchange\GoogleCloudTaskLaravel\GoogleCloudTasks;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Tests\Dummy\JobDummy;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Tests\Dummy\JobUrlGeneration;
 
 class AppEngineJobProcessingTest extends Orchestra
 {
-    public function setUp(): void
-    {
-        parent::setUp();
-        $this->mock(CloudTaskClientFactory::class, function (MockInterface $factory) {
-            $client = \Mockery::mock(CloudTasksClient::class);
+    use RefreshDatabase;
 
-            $factory->shouldReceive('make')
-                ->withAnyArgs()
-                ->once()
-                ->andReturn($client);
-        });
+    public function tearDown(): void
+    {
+        parent::tearDown();
+        Carbon::setTestNow();
     }
 
     public function testProcessesJob()
     {
+        $this->configureClient();
+
         $body = $this->makePayload(JobDummy::make());
 
         $this
@@ -44,15 +46,60 @@ class AppEngineJobProcessingTest extends Orchestra
             ->postJson(
                 route(
                     'google.tasks',
-                    ['connection' => 'app_engine_tasks']
+                    ['connection' => 'app_engine_tasks', 'queue' => 'default']
                 ),
                 $body
             )
-            ->assertOk();
+            ->assertNoContent();
+    }
+
+    public function testProcessesJobThatAreReleasedProvidesTheCorrectStatus()
+    {
+        $body = $this->makePayload(JobDummy::make()->mockRelease(), 2);
+
+        $this->mock(DispatcherFactory::class, function (MockInterface $factory) {
+            $dispatcher = \Mockery::mock(AppEngineDispatcher::class);
+            $dispatcher->shouldReceive('dispatch')
+                ->withArgs(function (
+                    $id,
+                    $queue,
+                    $payload,
+                    $scheduledFor,
+                    $cloudQueue
+                ) {
+                    $this->assertIsString($id);
+                    $this->assertSame('app_engine_tasks', $queue);
+                    $this->assertSame('default', $cloudQueue);
+                    $this->assertJson($payload);
+                    $json = json_decode($payload, true);
+                    $this->assertSame(JobDummy::class, data_get($json, 'displayName'));
+                    $this->assertSame(3, data_get($json, 'attempts'));
+
+                    return true;
+                })
+                ->once();
+            $factory->shouldReceive('makeAppEngineDispatcher')->once()->andReturn($dispatcher);
+        });
+
+        $this
+            ->withoutExceptionHandling()
+            ->withHeader('X-AppEngine-TaskName', '123')
+            ->withHeader('X-AppEngine-QueueName', 'default')
+            ->withHeader('X-AppEngine-TaskExecutionCount', 2)
+            ->postJson(
+                route(
+                    'google.tasks',
+                    ['connection' => 'app_engine_tasks', 'queue' => 'default']
+                ),
+                $body
+            )
+            ->assertStatus(Response::HTTP_PARTIAL_CONTENT);
     }
 
     public function testUrlMiddlewareAllowsForUrlGeneration()
     {
+        $this->configureClient();
+
         $body = $this->makePayload(JobUrlGeneration::make());
 
         Cache::forget('test-url');
@@ -65,17 +112,19 @@ class AppEngineJobProcessingTest extends Orchestra
             ->postJson(
                 route(
                     'google.tasks',
-                    ['connection' => 'app_engine_tasks']
+                    ['connection' => 'app_engine_tasks', 'queue' => 'default']
                 ),
                 $body
             )
-            ->assertOk();
+            ->assertNoContent();
 
         $this->assertSame('https://test.tradecoverexchange.com/test', Cache::get('test-url'));
     }
 
     public function testFiresTaskStartedAndTaskFinishedEvents()
     {
+        $this->configureClient();
+
         Event::fake([TaskStarted::class, TaskFinished::class]);
 
         $body = $this->makePayload(JobDummy::make());
@@ -88,11 +137,11 @@ class AppEngineJobProcessingTest extends Orchestra
             ->postJson(
                 route(
                     'google.tasks',
-                    ['connection' => 'app_engine_tasks']
+                    ['connection' => 'app_engine_tasks', 'queue' => 'default']
                 ),
                 $body
             )
-            ->assertOk();
+            ->assertNoContent();
 
         Event::assertDispatched(TaskStarted::class, function (TaskStarted $event) {
             $this->assertInstanceOf(CloudTask::class, $event->task);
@@ -110,18 +159,116 @@ class AppEngineJobProcessingTest extends Orchestra
         });
     }
 
+    public function testReleasesTheJobBackOntoTheQueueAfterThrowingAnExceptionInTheJob()
+    {
+        $body = $this->makePayload(JobDummy::make()->mockExceptionFiring(), 1);
+
+        $this->mock(DispatcherFactory::class, function (MockInterface $factory) {
+            $dispatcher = \Mockery::mock(AppEngineDispatcher::class);
+            $dispatcher->shouldReceive('dispatch')
+                ->withArgs(function (
+                    $id,
+                    $queue,
+                    $payload,
+                    $scheduledFor,
+                    $cloudQueue
+                ) {
+                    $this->assertIsString($id);
+                    $this->assertSame('app_engine_tasks', $queue);
+                    $this->assertSame('default', $cloudQueue);
+                    $this->assertJson($payload);
+                    $json = json_decode($payload, true);
+                    $this->assertSame(JobDummy::class, data_get($json, 'displayName'));
+                    $this->assertSame(2, data_get($json, 'attempts'));
+
+                    return true;
+                })
+                ->once();
+            $factory->shouldReceive('makeAppEngineDispatcher')->once()->andReturn($dispatcher);
+        });
+
+        $this
+            ->withoutExceptionHandling()
+            ->withHeader('X-AppEngine-TaskName', '123')
+            ->withHeader('X-AppEngine-QueueName', 'default')
+            ->withHeader('X-AppEngine-TaskExecutionCount', 0)
+            ->postJson(
+                route(
+                    'google.tasks',
+                    ['connection' => 'app_engine_tasks', 'queue' => 'default']
+                ),
+                $body
+            )
+            ->assertStatus(Response::HTTP_RESET_CONTENT);
+    }
+
+    public function testReleasesTheJobsWithDelay()
+    {
+        Carbon::setTestNow($timestamp = now());
+        $body = $this->makePayload(
+            JobDummy::make()
+                ->mockExceptionFiring()
+                ->withBackoff([5,10,20,30])
+                ->withTries(10),
+            3,
+        );
+
+        $this->mock(DispatcherFactory::class, function (MockInterface $factory) use ($timestamp) {
+            $dispatcher = \Mockery::mock(AppEngineDispatcher::class);
+            $dispatcher->shouldReceive('dispatch')
+                ->withArgs(function (
+                    $id,
+                    $queue,
+                    $payload,
+                    $scheduledFor,
+                    $cloudQueue
+                ) use ($timestamp) {
+                    $this->assertIsString($id);
+                    $this->assertSame('app_engine_tasks', $queue);
+                    $this->assertSame('default', $cloudQueue);
+                    $this->assertJson($payload);
+                    $json = json_decode($payload, true);
+                    $this->assertSame(JobDummy::class, data_get($json, 'displayName'));
+                    $this->assertSame(4, data_get($json, 'attempts'));
+                    $this->assertNotNull($scheduledFor);
+                    $this->assertIsNumeric($scheduledFor);
+                    $this->assertSame($timestamp->timestamp + 30, $scheduledFor);
+
+                    return true;
+                })
+                ->once();
+            $factory->shouldReceive('makeAppEngineDispatcher')->once()->andReturn($dispatcher);
+        });
+
+        $this
+            ->withoutExceptionHandling()
+            ->withHeader('X-AppEngine-TaskName', '123')
+            ->withHeader('X-AppEngine-QueueName', 'default')
+            ->withHeader('X-AppEngine-TaskExecutionCount', 0)
+            ->postJson(
+                route(
+                    'google.tasks',
+                    ['connection' => 'app_engine_tasks', 'queue' => 'default']
+                ),
+                $body
+            )
+            ->assertStatus(Response::HTTP_RESET_CONTENT);
+    }
+
     public function testTellsGoogleCloudTheTaskFailedFromTooManyTries()
     {
-        $body = $this->makePayload(JobDummy::make()->mockExceptionFiring());
+        $this->configureClient();
+
+        $body = $this->makePayload(JobDummy::make()->mockExceptionFiring(), 3);
 
         $this
             ->withHeader('X-AppEngine-TaskName', '123')
             ->withHeader('X-AppEngine-QueueName', 'default')
-            ->withHeader('X-AppEngine-TaskExecutionCount', 3)
+            ->withHeader('X-AppEngine-TaskExecutionCount', 0)
             ->postJson(
                 route(
                     'google.tasks',
-                    ['connection' => 'app_engine_tasks']
+                    ['connection' => 'app_engine_tasks', 'queue' => 'default']
                 ),
                 $body
             )
@@ -132,10 +279,17 @@ class AppEngineJobProcessingTest extends Orchestra
             'queue' => 'default',
             'connection' => 'app_engine_tasks',
         ]);
+
+        $this->assertStringStartsWith(
+            'Illuminate\Queue\MaxAttemptsExceededException: TradeCoverExchange\GoogleCloudTaskLaravel\Tests\Dummy\JobDummy has been attempted too many times or run too long. The job may have previously timed out.',
+            DB::table('failed_jobs')->soleValue('exception')
+        );
     }
 
     public function testTellsGoogleCloudTheTaskFailedFromMarkingAsFailed()
     {
+        $this->configureClient();
+
         $body = $this->makePayload(JobDummy::make()->mockFailing());
 
         $this
@@ -145,7 +299,7 @@ class AppEngineJobProcessingTest extends Orchestra
             ->postJson(
                 route(
                     'google.tasks',
-                    ['connection' => 'app_engine_tasks']
+                    ['connection' => 'app_engine_tasks', 'queue' => 'default']
                 ),
                 $body
             )
@@ -156,49 +310,44 @@ class AppEngineJobProcessingTest extends Orchestra
             'queue' => 'default',
             'connection' => 'app_engine_tasks',
         ]);
+
+        $this->assertStringStartsWith(
+            'RuntimeException: Marked as failure',
+            DB::table('failed_jobs')->soleValue('exception')
+        );
     }
 
-    public function testStoreFailedJobReport()
+    protected function makePayload($job, $attempt = 0)
     {
-        $body = $this->makePayload(JobDummy::make()->mockExceptionFiring());
-
-        $this
-            ->withHeader('X-AppEngine-TaskName', '123')
-            ->withHeader('X-AppEngine-QueueName', 'default')
-            ->withHeader('X-AppEngine-TaskExecutionCount', 1)
-            ->postJson(
-                route(
-                    'google.tasks',
-                    ['connection' => 'app_engine_tasks']
-                ),
-                $body
-            )
-            ->assertStatus(Response::HTTP_BAD_REQUEST);
-    }
-
-    protected function makePayload($job)
-    {
-        $payload = [
+        return [
             'displayName' => get_class($job),
             'job' => 'Illuminate\Queue\CallQueuedHandler@call',
             'maxTries' => $job->tries ?? null,
-            'delay' => 0,
+            'delay' => $job->delay ?? null,
+            'backoff' => method_exists($job, 'backoff') && $job->backoff()
+                ? implode(',', $job->backoff())
+                : null,
             'timeout' => $job->timeout ?? null,
             'timeoutAt' => null,
-            'data' => [
-                'commandName' => $job,
-                'command' => $job,
-            ],
-        ];
-
-        return array_merge($payload, [
             'data' => [
                 'commandName' => get_class($job),
                 'command' => serialize(clone $job),
             ],
             'id' => '123',
-            'attempts' => 0,
-        ]);
+            'attempts' => $attempt,
+        ];
+    }
+
+    protected function configureClient()
+    {
+        $this->mock(CloudTaskClientFactory::class, function (MockInterface $factory) {
+            $client = \Mockery::mock(CloudTasksClient::class);
+
+            $factory->shouldReceive('make')
+                ->withAnyArgs()
+                ->once()
+                ->andReturn($client);
+        });
     }
 
     protected function getPackageProviders($app)

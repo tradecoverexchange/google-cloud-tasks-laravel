@@ -12,7 +12,7 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\Middlewares\ConfigureUrlGenerator;
 
 class CloudTaskServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishes(
@@ -21,12 +21,22 @@ class CloudTaskServiceProvider extends ServiceProvider
                 ],
                 'cloud-task-config'
             );
+
+            $this->commands([
+                Commands\CreateQueueCommand::class,
+                Commands\DeleteQueueCommand::class,
+                Commands\PurgeQueueCommand::class,
+                Commands\QueueStatusCommand::class,
+                Commands\QueueStatsCommand::class,
+                Commands\UpdateQueueCommand::class,
+                Commands\ListTasksCommand::class,
+            ]);
         }
 
         $this->mapRoutes();
     }
 
-    public function register()
+    public function register(): void
     {
         $this->app->when(CloudTasksController::class)
             ->needs(Worker::class)
@@ -34,7 +44,7 @@ class CloudTaskServiceProvider extends ServiceProvider
                 return $this->app->make('queue.worker');
             });
 
-        $this->app->singleton(GoogleCloudTasks::class);
+        $this->app->scoped(GoogleCloudTasks::class);
 
         // Queue Factory extension used to make the package compatible with other packages
         // which might try to access the factory before the boot method of this service
@@ -53,7 +63,7 @@ class CloudTaskServiceProvider extends ServiceProvider
 
     protected function mapRoutes()
     {
-        Route::any('/_/google-tasks/{connection}', CloudTasksController::class)
+        Route::post('/_googleTasks/{connection}/{queue}', CloudTasksController::class)
             ->name('google.tasks')
             ->middleware([CloudTasks::class, ConfigureUrlGenerator::class]);
     }

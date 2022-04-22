@@ -6,13 +6,7 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTask;
 
 class TaskStarted
 {
-    /**
-     * @var CloudTask
-     */
-    public $task;
-
-    public function __construct(CloudTask $task)
+    public function __construct(public CloudTask $task)
     {
-        $this->task = $task;
     }
 }

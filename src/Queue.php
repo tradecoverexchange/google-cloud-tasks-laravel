@@ -4,12 +4,14 @@ namespace TradeCoverExchange\GoogleCloudTaskLaravel;
 
 use DateInterval;
 use DateTimeInterface;
+use Google\Cloud\Tasks\V2beta3\CloudTasksClient;
 use Illuminate\Contracts\Queue\Job as BaseJob;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 use Illuminate\Queue\Queue as BaseQueue;
 use Illuminate\Support\InteractsWithTime;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Factories\TaskFactory;
 
 class Queue extends BaseQueue implements QueueContract
 {
@@ -18,23 +20,19 @@ class Queue extends BaseQueue implements QueueContract
     /**
      * @var string
      */
-    protected $projectId;
+    protected string $location;
     /**
      * @var string
      */
-    protected $location;
-    /**
-     * @var string
-     */
-    protected $defaultQueue;
+    protected string $defaultQueue;
     /**
      * @var Dispatcher
      */
-    protected $client;
+    protected Dispatcher $client;
     /**
      * @var TaskFactory
      */
-    private $factory;
+    private TaskFactory $factory;
 
     public function __construct(Dispatcher $client, TaskFactory $factory, string $defaultQueue)
     {
@@ -50,9 +48,9 @@ class Queue extends BaseQueue implements QueueContract
      *
      * @return int
      */
-    public function size($queue = null)
+    public function size($queue = null): int
     {
-        return 0;
+        return $this->client->size($this->getQueue($queue));
     }
 
     /**
@@ -64,7 +62,7 @@ class Queue extends BaseQueue implements QueueContract
      *
      * @return mixed
      */
-    public function push($job, $data = '', $queue = null)
+    public function push($job, $data = '', $queue = null): mixed
     {
         return $this->pushRaw($this->createPayload($job, $this->getQueue($queue), $data), $queue);
     }
@@ -78,7 +76,7 @@ class Queue extends BaseQueue implements QueueContract
      *
      * @return mixed
      */
-    public function pushRaw($payload, $queue = null, array $options = [])
+    public function pushRaw($payload, $queue = null, array $options = []): mixed
     {
         $id = json_decode($payload, true)['id'] ?? null;
 
@@ -101,7 +99,7 @@ class Queue extends BaseQueue implements QueueContract
      *
      * @return string|null
      */
-    public function later($delay, $job, $data = '', $queue = null)
+    public function later($delay, $job, $data = '', $queue = null): string|null
     {
         $this->checkDelayValueIsValid($delay);
         $scheduledAt = $this->availableAt($delay);
@@ -126,7 +124,7 @@ class Queue extends BaseQueue implements QueueContract
      * @return BaseJob|null
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function pop($queue = null)
+    public function pop($queue = null): BaseJob|null
     {
         $task = $this->factory->make($this->getConnectionName());
 
@@ -148,28 +146,25 @@ class Queue extends BaseQueue implements QueueContract
      *
      * @return array
      */
-    protected function createPayloadArray($job, $queue, $data = '')
+    protected function createPayloadArray($job, $queue, $data = ''): array
     {
-        if (! is_object($job)) {
-            throw new InvalidArgumentException('Arguement $job is expected to be an object');
-        }
+        $payload = parent::createPayloadArray($job, $queue, $data);
 
-        return array_merge(parent::createPayloadArray($job, $queue, $data), [
-            'id' => $this->getRandomId($job),
-            'attempts' => 0,
-        ]);
+        return [
+            ...$payload,
+            'id' => $this->getRandomId(),
+            'attempts' => $payload['attempts'] ?? 0,
+        ];
     }
 
     /**
      * Get a random ID string.
      *
-     * @param object $job
      * @return string
      */
-    protected function getRandomId(object $job)
+    protected function getRandomId(): string
     {
-        return str_replace(['_', '\\'], ['__', '_'], get_class($job)) . '-' .
-            now()->format('Ymdhis') . '-' . Str::random(16);
+        return Str::random(32);
     }
 
     /**
@@ -179,9 +174,14 @@ class Queue extends BaseQueue implements QueueContract
      *
      * @return string
      */
-    public function getQueue($queue)
+    public function getQueue(string|null $queue): string
     {
         return $queue ?? $this->defaultQueue;
+    }
+
+    public function client(): CloudTasksClient
+    {
+        return $this->client->client();
     }
 
     /**
@@ -190,21 +190,41 @@ class Queue extends BaseQueue implements QueueContract
      * @param string $name
      * @param int|null $scheduledAt
      */
-    protected function pushGoogleTask(string $queue, string $payload, string $name, ?int $scheduledAt = null)
+    protected function pushGoogleTask(string $queue, string $payload, string $name, int|null $scheduledAt = null): void
     {
         $this->client->dispatch($name, $this->getConnectionName(), $payload, $scheduledAt, $queue);
+    }
+
+    public function release(Job $runningJob, mixed $job, int $delay = 0): void
+    {
+        $callbacks = static::$createPayloadCallbacks;
+
+        static::$createPayloadCallbacks[] = function ($connection, $queue, $payload) use ($runningJob) {
+            $payload['attempts'] = $payload['attempts'] ?? $runningJob->attempts();
+            $payload['id'] = $payload['id'] ?? $this->getRandomId();
+
+            return $payload;
+        };
+
+        if ($delay !== 0) {
+            $this->later(delay: $delay, job: $job, queue: $runningJob->getQueue());
+        } else {
+            $this->push(job: $job, queue: $runningJob->getQueue());
+        }
+
+        static::$createPayloadCallbacks = $callbacks;
     }
 
     /**
      * @param DateInterval|DateTimeInterface|int $delay
      */
-    protected function checkDelayValueIsValid($delay)
+    protected function checkDelayValueIsValid(mixed $delay): void
     {
         if (
             $delay !== null &&
             ! $delay instanceof DateTimeInterface &&
             ! $delay instanceof DateInterval &&
-            ! (is_int($delay) && $delay > 0)
+            ! (is_int($delay) && $delay >= 0)
         ) {
             $type = gettype($delay);
             if (! is_int($delay)) {

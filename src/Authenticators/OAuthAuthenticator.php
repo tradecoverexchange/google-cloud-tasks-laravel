@@ -1,6 +1,6 @@
 <?php
 
-namespace TradeCoverExchange\GoogleCloudTaskLaravel\Authenticator;
+namespace TradeCoverExchange\GoogleCloudTaskLaravel\Authenticators;
 
 use Google\Cloud\Tasks\V2beta3\HttpRequest;
 use Google\Cloud\Tasks\V2beta3\OAuthToken;
@@ -8,19 +8,8 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\HttpRequestAuthenticator;
 
 class OAuthAuthenticator implements HttpRequestAuthenticator
 {
-    /**
-     * @var string
-     */
-    private $serviceAccountEmail;
-    /**
-     * @var string|null
-     */
-    private $scope;
-
-    public function __construct(string $serviceAccountEmail, ?string $scope = null)
+    public function __construct(protected string $serviceAccountEmail, protected string|null $scope = null)
     {
-        $this->serviceAccountEmail = $serviceAccountEmail;
-        $this->scope = $scope;
     }
 
     public function addAuthentication(HttpRequest $request): HttpRequest

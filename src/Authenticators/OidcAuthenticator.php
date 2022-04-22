@@ -1,6 +1,6 @@
 <?php
 
-namespace TradeCoverExchange\GoogleCloudTaskLaravel\Authenticator;
+namespace TradeCoverExchange\GoogleCloudTaskLaravel\Authenticators;
 
 use Google\Cloud\Tasks\V2beta3\HttpRequest;
 use Google\Cloud\Tasks\V2beta3\OidcToken;
@@ -8,19 +8,8 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\HttpRequestAuthenticator;
 
 class OidcAuthenticator implements HttpRequestAuthenticator
 {
-    /**
-     * @var string
-     */
-    private $serviceAccountEmail;
-    /**
-     * @var string
-     */
-    private $audience;
-
-    public function __construct(string $serviceAccountEmail, ?string $audience = null)
+    public function __construct(protected string $serviceAccountEmail, protected string|null $audience = null)
     {
-        $this->serviceAccountEmail = $serviceAccountEmail;
-        $this->audience = $audience;
     }
 
     public function addAuthentication(HttpRequest $request): HttpRequest

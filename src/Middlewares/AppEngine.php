@@ -14,7 +14,7 @@ class AppEngine
      * @param \Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(mixed $request, Closure $next): mixed
     {
         abort_if(! $request->hasHeader('X-AppEngine-QueueName'), Response::HTTP_UNAUTHORIZED);
 

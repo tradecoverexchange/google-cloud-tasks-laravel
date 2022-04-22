@@ -11,32 +11,27 @@ class Job extends BaseJob implements JobContract
     /**
      * @var string
      */
-    public $job;
+    public string $job;
     /**
      * @var array
      */
-    public $decoded;
+    public array $decoded;
     /**
      * @var Queue
      */
-    public $googleTasks;
-    /**
-     * @var CloudTask
-     */
-    private $task;
+    public Queue $googleTasks;
 
     public function __construct(
         string $connectionName,
         Container $container,
         Queue $googleTasks,
         string $queue,
-        CloudTask $task
+        protected CloudTask $task
     ) {
         $this->connectionName = $connectionName;
         $this->queue = $queue;
         $this->container = $container;
         $this->googleTasks = $googleTasks;
-        $this->task = $task;
 
         $this->decoded = $this->payload();
     }
@@ -46,7 +41,7 @@ class Job extends BaseJob implements JobContract
      *
      * @return string
      */
-    public function getJobId()
+    public function getJobId(): string
     {
         return $this->decoded['id'] ?? '';
     }
@@ -56,9 +51,22 @@ class Job extends BaseJob implements JobContract
      *
      * @return string
      */
-    public function getRawBody()
+    public function getRawBody(): string
     {
         return $this->task->payload();
+    }
+
+    /**
+     * Release the job back into the queue after (n) seconds.
+     *
+     * @param  int  $delay
+     * @return void
+     */
+    public function release($delay = 0)
+    {
+        parent::release($delay);
+        $job = unserialize($this->decoded['data']['command']);
+        $this->googleTasks->release($this, $job, $delay);
     }
 
     /**
@@ -66,8 +74,8 @@ class Job extends BaseJob implements JobContract
      *
      * @return int
      */
-    public function attempts()
+    public function attempts(): int
     {
-        return $this->task->executionCount();
+        return ($this->decoded['attempts'] ?? null) + 1;
     }
 }

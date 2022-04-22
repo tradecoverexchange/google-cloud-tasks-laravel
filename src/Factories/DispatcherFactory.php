@@ -1,26 +1,17 @@
 <?php
 
-namespace TradeCoverExchange\GoogleCloudTaskLaravel;
+namespace TradeCoverExchange\GoogleCloudTaskLaravel\Factories;
 
-use TradeCoverExchange\GoogleCloudTaskLaravel\Dispatcher\AppEngineDispatcher;
-use TradeCoverExchange\GoogleCloudTaskLaravel\Dispatcher\HttpDispatcher;
-use TradeCoverExchange\GoogleCloudTaskLaravel\Factories\CloudTaskClientFactory;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Dispatcher;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Dispatchers\AppEngineDispatcher;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Dispatchers\HttpDispatcher;
+use TradeCoverExchange\GoogleCloudTaskLaravel\HttpRequestAuthenticator;
+use TradeCoverExchange\GoogleCloudTaskLaravel\RequestGenerator;
 
 class DispatcherFactory
 {
-    /**
-     * @var CloudTaskClientFactory
-     */
-    private $factory;
-    /**
-     * @var RequestGenerator
-     */
-    private $generator;
-
-    public function __construct(CloudTaskClientFactory $factory, RequestGenerator $generator)
+    public function __construct(protected CloudTaskClientFactory $factory, protected RequestGenerator $generator)
     {
-        $this->factory = $factory;
-        $this->generator = $generator;
     }
 
     public function makeAppEngineDispatcher(

@@ -1,25 +1,22 @@
 <?php
 
-namespace TradeCoverExchange\GoogleCloudTaskLaravel;
+namespace TradeCoverExchange\GoogleCloudTaskLaravel\Factories;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
+use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTask;
+use TradeCoverExchange\GoogleCloudTaskLaravel\ConnectionRetrieval;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Connectors\AppEngineConnector;
 use TradeCoverExchange\GoogleCloudTaskLaravel\Connectors\CloudTasksConnector;
+use TradeCoverExchange\GoogleCloudTaskLaravel\Tasks;
 
 class TaskFactory
 {
     use ConnectionRetrieval;
 
-    /**
-     * @var Container
-     */
-    private $container;
-
-    public function __construct(Container $container)
+    public function __construct(protected Container $container)
     {
-        $this->container = $container;
     }
 
     /**
@@ -32,9 +29,9 @@ class TaskFactory
         $config = $this->getConfig($connection);
 
         if ($config['driver'] === AppEngineConnector::DRIVER) {
-            return new CloudTask\AppEngineTask($this->container->make(Request::class));
+            return new Tasks\AppEngineTask($this->container->make(Request::class));
         } elseif ($config['driver'] === CloudTasksConnector::DRIVER) {
-            return new CloudTask\HttpCloudTask($this->container->make(Request::class));
+            return new Tasks\HttpCloudTask($this->container->make(Request::class));
         }
 
         throw new \RuntimeException();

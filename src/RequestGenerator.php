@@ -12,22 +12,11 @@ class RequestGenerator
 {
     use ConnectionRetrieval;
 
-    /**
-     * @var UrlGenerator
-     */
-    private $generator;
-    /**
-     * @var Container
-     */
-    private $container;
-
-    public function __construct(UrlGenerator $generator, Container $container)
+    public function __construct(protected UrlGenerator $generator, protected Container $container)
     {
-        $this->generator = $generator;
-        $this->container = $container;
     }
 
-    public function forAppEngine(string $payload, string $connection): AppEngineHttpRequest
+    public function forAppEngine(string $payload, string $connection, string $queue): AppEngineHttpRequest
     {
         return (new AppEngineHttpRequest())
             ->setHttpMethod(HttpMethod::POST)
@@ -35,24 +24,23 @@ class RequestGenerator
             ->setRelativeUri(
                 $this->generator->route(
                     'google.tasks',
-                    ['connection' => $connection],
+                    ['connection' => $connection, 'queue' => $queue],
                     false
                 )
             );
     }
 
-    public function forHttpHandler(string $payload, string $connection): HttpRequest
+    public function forHttpHandler(string $payload, string $connection, string $queue): HttpRequest
     {
         return (new HttpRequest())
             ->setHttpMethod(HttpMethod::POST)
             ->setBody($payload)
             ->setUrl(
-                //TODO generate domain for url or use current host
-                $this->cloudTasksUrl($connection)
+                $this->cloudTasksUrl($connection, $queue)
             );
     }
 
-    protected function cloudTasksUrl($connection): string
+    protected function cloudTasksUrl(string $connection, string $queue): string
     {
         $config = $this->getConfig($connection);
 
@@ -60,7 +48,7 @@ class RequestGenerator
             return 'https://' . $config['domain'] .
                 $this->generator->route(
                     'google.tasks',
-                    ['connection' => $connection],
+                    ['connection' => $connection, 'queue' => $queue],
                     false
                 );
         }
@@ -68,7 +56,7 @@ class RequestGenerator
         return $this->generator->secure(
             $this->generator->route(
                 'google.tasks',
-                ['connection' => $connection],
+                ['connection' => $connection, 'queue' => $queue],
                 false
             )
         );

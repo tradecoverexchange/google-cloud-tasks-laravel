@@ -38,7 +38,7 @@ class JobDispatchTest extends Orchestra
                 $this->assertSame('projects/test/locations/europe-west1/queues/default', $project);
                 $this->assertInstanceOf(Task::class, $task);
                 $this->assertSame(
-                    'https://localhost/_/google-tasks/http_cloud_tasks',
+                    'https://localhost/_googleTasks/http_cloud_tasks/default',
                     $task->getHttpRequest()->getUrl()
                 );
 
@@ -59,7 +59,7 @@ class JobDispatchTest extends Orchestra
                 $this->assertSame('projects/test/locations/europe-west1/queues/default', $project);
                 $this->assertInstanceOf(Task::class, $task);
                 $this->assertSame(
-                    'https://test.tradecoverexchange.com/_/google-tasks/http_cloud_tasks',
+                    'https://test.tradecoverexchange.com/_googleTasks/http_cloud_tasks/default',
                     $task->getHttpRequest()->getUrl()
                 );
 

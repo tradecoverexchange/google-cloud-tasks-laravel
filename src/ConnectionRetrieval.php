@@ -3,21 +3,22 @@
 namespace TradeCoverExchange\GoogleCloudTaskLaravel;
 
 use Illuminate\Config\Repository;
-use Illuminate\Contracts\Container\BindingResolutionException;
+
+use Illuminate\Contracts\Container\Container;
 
 trait ConnectionRetrieval
 {
     /**
-     * Get the queue connection configuration.
-     *
-     * @param string $name
-     * @return array
-     * @throws BindingResolutionException
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    protected function getConfig($name)
+    protected function getConfig(string $name): array
     {
-        if ($name) {
-            return $this->container->make(Repository::class)->get("queue.connections.{$name}");
+        $container = property_exists($this, 'container') && $this->container instanceof Container
+            ? $this->container
+            : \Illuminate\Container\Container::getInstance();
+
+        if ($container->make(Repository::class)->has("queue.connections.{$name}")) {
+            return $container->make(Repository::class)->get("queue.connections.{$name}");
         }
 
         return ['driver' => 'null'];

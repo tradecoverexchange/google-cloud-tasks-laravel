@@ -14,14 +14,8 @@ class CloudTasks
 {
     use ConnectionRetrieval;
 
-    /**
-     * @var Container
-     */
-    private $container;
-
-    public function __construct(Container $container)
+    public function __construct(protected Container $container)
     {
-        $this->container = $container;
     }
 
     /**
@@ -31,7 +25,7 @@ class CloudTasks
      * @param \Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(mixed $request, Closure $next): mixed
     {
         if (
             ($connection = $request->route()->parameter('connection')) &&

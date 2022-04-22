@@ -1,6 +1,6 @@
 <?php
 
-namespace TradeCoverExchange\GoogleCloudTaskLaravel\CloudTask;
+namespace TradeCoverExchange\GoogleCloudTaskLaravel\Tasks;
 
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
@@ -9,14 +9,8 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTask;
 
 class HttpCloudTask implements CloudTask
 {
-    /**
-     * @var Request
-     */
-    protected $request;
-
-    public function __construct(Request $request)
+    public function __construct(protected Request $request)
     {
-        $this->request = $request;
     }
 
     public function queueName(): string
@@ -46,7 +40,7 @@ class HttpCloudTask implements CloudTask
         );
     }
 
-    public function previousResponseStatusCode(): ?int
+    public function previousResponseStatusCode(): int|null
     {
         return $this->request->hasHeader('X-CloudTasks-TaskPreviousResponse') ?
             (int) $this->request->header('X-CloudTasks-TaskPreviousResponse') :
