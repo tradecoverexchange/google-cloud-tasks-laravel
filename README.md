@@ -9,7 +9,7 @@ A Laravel Queue driver to interact with [Google Cloud Tasks](https://cloud.googl
 
 ## Installation
 
-Requires Laravel 8 and PHP 7.4 as a minimum.
+Requires Laravel 9 and PHP 8.1 as a minimum.
 
 You can install the package via composer:
 
@@ -62,13 +62,8 @@ Usage of the package should primarily be done via the [Laravel Queue](https://la
 
 ## Missing Features
 
-There are still a couple of features not yet supported, namely job deletion and release.
-We plan to add this, it should be perfectly feasible but was not required for our project
-hence why we have not implemented it.
-
-We also hope to add commands later on which will allow for the creation and management
-of the queues from the artisan console. For the moment you will need to use the [Google
-Cloud SDK tool to do this](https://cloud.google.com/tasks/docs/creating-queues).
+There is no ability to configure the worker options in the same way as a typical queue connection
+in Laravel.
 
 For Http Tasks only the OIDC token type has been implemented for protecting the controller
 from fraudulent requests. We don't use OAuth ourselves but would be happy to include if
