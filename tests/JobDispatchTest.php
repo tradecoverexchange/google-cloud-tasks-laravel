@@ -27,8 +27,6 @@ class JobDispatchTest extends Orchestra
                 ->once()
                 ->andReturn($this->client);
         });
-
-        $this->withFactories(__DIR__.'/database/factories');
     }
 
     public function testCanDispatchToHttpQueue()
