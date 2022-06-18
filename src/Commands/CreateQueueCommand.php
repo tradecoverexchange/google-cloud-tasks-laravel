@@ -26,10 +26,10 @@ class CreateQueueCommand extends QueueInteractionCommand
         $cloudQueue = new Queue();
         $cloudQueue->setName(
             CloudTasksClient::queueName(
-            $config['project_id'],
-            $config['location'],
-            $queueName ?? $config['queue']
-        )
+                $config['project_id'],
+                $config['location'],
+                $queueName ?? $config['queue']
+            )
         );
         $cloudQueue = $queueModifier->apply($cloudQueue, $config['settings'] ?? []);
         $client->createQueue($location, $cloudQueue);
