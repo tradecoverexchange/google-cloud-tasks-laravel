@@ -23,7 +23,9 @@ class UpdateQueueCommand extends QueueInteractionCommand
         CloudQueueModifier $queueModifier
     ): int {
         $cloudQueueName = CloudTasksClient::queueName(
-            $config['project_id'], $config['location'], $queueName ?? $config['queue']
+            $config['project_id'],
+            $config['location'],
+            $queueName ?? $config['queue']
         );
         $cloudQueue = new Queue();
         $cloudQueue->setName($cloudQueueName);

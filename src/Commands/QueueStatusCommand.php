@@ -25,7 +25,9 @@ class QueueStatusCommand extends QueueInteractionCommand
     {
         $shouldToggle = (bool) $this->option('toggle');
         $cloudQueueName = CloudTasksClient::queueName(
-            $config['project_id'], $config['location'], $queueName ?? $config['queue']
+            $config['project_id'],
+            $config['location'],
+            $queueName ?? $config['queue']
         );
         $cloudQueue = $client->getQueue($cloudQueueName);
         $this->line(sprintf(

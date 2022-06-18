@@ -67,8 +67,9 @@ class AppEngineDispatcher implements Dispatcher
     {
         $queueName = Client::queueName($this->projectId, $this->location, $queue);
         $cloudQueue = $this->client->getQueue($queueName, [
-            'readMask' => new FieldMask(['paths' => ['stats.tasksCount']])
+            'readMask' => new FieldMask(['paths' => ['stats.tasksCount']]),
         ]);
+
         return (int) $cloudQueue->getStats()->getTasksCount();
     }
 }

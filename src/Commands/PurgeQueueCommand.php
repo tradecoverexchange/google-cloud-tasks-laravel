@@ -22,7 +22,9 @@ class PurgeQueueCommand extends QueueInteractionCommand
             return 0;
         }
         $cloudQueueName = CloudTasksClient::queueName(
-            $config['project_id'], $config['location'], $queueName ?? $config['queue']
+            $config['project_id'],
+            $config['location'],
+            $queueName ?? $config['queue']
         );
         $client->purgeQueue($cloudQueueName);
         $this->line("Queue {$namespaceName} is being purged.");

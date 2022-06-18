@@ -5,8 +5,6 @@ namespace TradeCoverExchange\GoogleCloudTaskLaravel\Tests;
 use Google\Cloud\Tasks\V2beta3\CloudTasksClient;
 use Google\Cloud\Tasks\V2beta3\Queue;
 use Google\Cloud\Tasks\V2beta3\QueueStats;
-use Google\Protobuf\FieldMask;
-use Illuminate\Queue\Console\MonitorCommand;
 use Mockery\MockInterface;
 use Orchestra\Testbench\TestCase;
 use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTaskServiceProvider;
@@ -26,7 +24,6 @@ class MonitorCommandTest extends TestCase
                 ->withAnyArgs()
                 ->once()
                 ->andReturn($this->client);
-
         });
     }
 
@@ -37,17 +34,17 @@ class MonitorCommandTest extends TestCase
 
         $this->client
             ->shouldReceive('getQueue')
-            ->with('projects/test/locations/europe-west1/queues/default', \Mockery::on(fn($value) => is_array($value)))
+            ->with('projects/test/locations/europe-west1/queues/default', \Mockery::on(fn ($value) => is_array($value)))
             ->andReturn($cloudQueue);
 
         $cloudQueue->setStats($stats);
         $stats->setTasksCount(10);
 
         $this->artisan('queue:monitor', [
-            'queues' => 'http_cloud_tasks:default'
+            'queues' => 'http_cloud_tasks:default',
         ])
             ->expectsTable(['Connection', 'Queue', 'Size', 'Status'], [[
-                'http_cloud_tasks', 'default', '10', 'OK'
+                'http_cloud_tasks', 'default', '10', 'OK',
             ]])
             ->assertExitCode(0);
     }

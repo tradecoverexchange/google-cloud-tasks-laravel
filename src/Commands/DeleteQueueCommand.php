@@ -29,7 +29,9 @@ WARN
             return 0;
         }
         $queueName = CloudTasksClient::queueName(
-            $config['project_id'], $config['location'], $queueName ?? $config['queue']
+            $config['project_id'],
+            $config['location'],
+            $queueName ?? $config['queue']
         );
         $client->deleteQueue($queueName);
         $this->line("Queue {$namespaceName} has been deleted.");

@@ -2,7 +2,6 @@
 
 namespace TradeCoverExchange\GoogleCloudTaskLaravel\Tests;
 
-use Google\ApiCore\Page;
 use Google\ApiCore\PagedListResponse;
 use Google\Cloud\Tasks\V2beta3\Attempt;
 use Google\Cloud\Tasks\V2beta3\CloudTasksClient;
@@ -10,7 +9,6 @@ use Google\Cloud\Tasks\V2beta3\Queue;
 use Google\Cloud\Tasks\V2beta3\Queue\State;
 use Google\Cloud\Tasks\V2beta3\QueueStats;
 use Google\Cloud\Tasks\V2beta3\Task;
-use Google\Protobuf\FieldMask;
 use Google\Protobuf\Timestamp;
 use Illuminate\Support\Carbon;
 use Mockery\MockInterface;
@@ -32,7 +30,6 @@ class CommandsTest extends TestCase
                 ->withAnyArgs()
                 ->once()
                 ->andReturn($this->client);
-
         });
     }
 
@@ -51,7 +48,7 @@ class CommandsTest extends TestCase
             ->once();
 
         $this->artisan('google:cloud:queue:create', [
-            'name' => 'http_cloud_tasks'
+            'name' => 'http_cloud_tasks',
         ])
             ->assertExitCode(0);
     }
@@ -63,7 +60,7 @@ class CommandsTest extends TestCase
             ->once();
 
         $this->artisan('google:cloud:queue:delete', [
-            'name' => 'http_cloud_tasks'
+            'name' => 'http_cloud_tasks',
         ])
             ->expectsQuestion('This action will delete all unfinished tasks permanently, do you wish to continue?', 'y')
             ->assertExitCode(0);
@@ -89,7 +86,7 @@ class CommandsTest extends TestCase
             ->once();
 
         $this->artisan('google:cloud:queue:clear', [
-            'name' => 'http_cloud_tasks'
+            'name' => 'http_cloud_tasks',
         ])
             ->expectsQuestion('This action will delete all unfinished tasks permanently, do you wish to continue?', 'y')
             ->assertExitCode(0);
@@ -117,7 +114,7 @@ class CommandsTest extends TestCase
             ->once();
 
         $this->artisan('google:cloud:queue:update', [
-            'name' => 'http_cloud_tasks'
+            'name' => 'http_cloud_tasks',
         ])
             ->assertExitCode(0);
     }
@@ -131,7 +128,7 @@ class CommandsTest extends TestCase
 
         $this->client
             ->shouldReceive('getQueue')
-            ->with('projects/test/locations/europe-west1/queues/default', \Mockery::on(fn($value) => is_array($value)))
+            ->with('projects/test/locations/europe-west1/queues/default', \Mockery::on(fn ($value) => is_array($value)))
             ->andReturn($cloudQueue);
 
         $cloudQueue->setState(Queue\State::RUNNING);
@@ -142,7 +139,7 @@ class CommandsTest extends TestCase
         $stats->setOldestEstimatedArrivalTime((new Timestamp())->setSeconds(now()->timestamp));
 
         $this->artisan('google:cloud:queue:stats', [
-            'name' => 'http_cloud_tasks'
+            'name' => 'http_cloud_tasks',
         ])
             ->expectsTable([
                 'queue',
@@ -180,7 +177,7 @@ class CommandsTest extends TestCase
         $cloudQueue->setState(Queue\State::RUNNING);
 
         $this->artisan('google:cloud:queue:status', [
-            'name' => 'http_cloud_tasks'
+            'name' => 'http_cloud_tasks',
         ])
             ->expectsOutput('Queue http_cloud_tasks:default is running')
             ->assertExitCode(0);
@@ -249,7 +246,9 @@ class CommandsTest extends TestCase
         $paginated = \Mockery::mock(PagedListResponse::class)
             ->shouldReceive('iterateAllElements')
             ->andReturn(function () use ($tasks): \Generator {
-                foreach ($tasks as $task) yield $task;
+                foreach ($tasks as $task) {
+                    yield $task;
+                }
             })
             ->getMock();
 

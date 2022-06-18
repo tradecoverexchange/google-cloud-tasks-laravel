@@ -22,7 +22,9 @@ class ListTasksCommand extends QueueInteractionCommand
         array $config,
     ): int {
         $cloudQueueName = CloudTasksClient::queueName(
-            $config['project_id'], $config['location'], $queueName ?? $config['queue']
+            $config['project_id'],
+            $config['location'],
+            $queueName ?? $config['queue']
         );
 
         $pagedResponse = $client->listTasks($cloudQueueName);

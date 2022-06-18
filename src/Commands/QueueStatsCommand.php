@@ -19,10 +19,12 @@ class QueueStatsCommand extends QueueInteractionCommand
     public function action(CloudTasksClient $client, string $namespaceName, string|null $queueName, array $config): int
     {
         $cloudQueueName = CloudTasksClient::queueName(
-            $config['project_id'], $config['location'], $queueName ?? $config['queue']
+            $config['project_id'],
+            $config['location'],
+            $queueName ?? $config['queue']
         );
         $cloudQueue = $client->getQueue($cloudQueueName, [
-            'readMask' => new FieldMask(['paths' => ['state', 'stats']])
+            'readMask' => new FieldMask(['paths' => ['state', 'stats']]),
         ]);
         $stats = $cloudQueue->getStats();
 

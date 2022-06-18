@@ -15,8 +15,7 @@ class CloudTasksQueueDoesNotExistException extends \Exception implements Provide
 
     public function getSolution(): Solution
     {
-        return new class($this->connection, $this->queue) implements Solution {
-
+        return new class ($this->connection, $this->queue) implements Solution {
             public function __construct(protected string $connection, protected string $queue)
             {
             }
@@ -39,7 +38,7 @@ class CloudTasksQueueDoesNotExistException extends \Exception implements Provide
             public function getDocumentationLinks(): array
             {
                 return [
-                    'Google Cloud - Cloud Tasks - Creating Queues' => 'https://cloud.google.com/tasks/docs/creating-queues'
+                    'Google Cloud - Cloud Tasks - Creating Queues' => 'https://cloud.google.com/tasks/docs/creating-queues',
                 ];
             }
         };

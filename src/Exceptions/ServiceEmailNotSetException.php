@@ -15,8 +15,7 @@ class ServiceEmailNotSetException extends \Exception implements ProvidesSolution
 
     public function getSolution(): Solution
     {
-        return new class($this->connection) implements Solution {
-
+        return new class ($this->connection) implements Solution {
             public function __construct(protected string $connection)
             {
             }
