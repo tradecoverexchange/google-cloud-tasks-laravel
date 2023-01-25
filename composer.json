@@ -52,7 +52,7 @@
     "prefer-stable": true,
     "require": {
         "php": "^8.1",
-        "google/cloud-tasks": ">=1.6",
+        "google/cloud-tasks": "^1.9.0",
         "kevinrob/guzzle-cache-middleware": "^3.3",
         "illuminate/contracts": "10.*|9.*",
         "tradecoverexchange/google-cloud-jwt-validator": "^1.1"
