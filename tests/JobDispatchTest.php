@@ -29,7 +29,7 @@ class JobDispatchTest extends Orchestra
         });
     }
 
-    public function testCanDispatchToHttpQueue()
+    public function test_can_dispatch_to_http_queue()
     {
         $this->client->shouldReceive('createTask')
             ->withArgs(function (string $project, Task $task) {
@@ -48,7 +48,7 @@ class JobDispatchTest extends Orchestra
             ->onConnection('http_cloud_tasks');
     }
 
-    public function testCanDispatchToHttpQueueToConfiguredDomain()
+    public function test_can_dispatch_to_http_queue_to_configured_domain()
     {
         Config::set('queue.connections.http_cloud_tasks.domain', 'test.tradecoverexchange.com');
 
@@ -69,7 +69,7 @@ class JobDispatchTest extends Orchestra
             ->onConnection('http_cloud_tasks');
     }
 
-    public function testCanDispatchToAppEngineQueue()
+    public function test_can_dispatch_to_app_engine_queue()
     {
         $this->client->shouldReceive('createTask')
             ->with(
@@ -82,7 +82,7 @@ class JobDispatchTest extends Orchestra
             ->onConnection('app_engine_tasks');
     }
 
-    public function testCanDispatchWithDelay()
+    public function test_can_dispatch_with_delay()
     {
         $this->client->shouldReceive('createTask')
             ->with(

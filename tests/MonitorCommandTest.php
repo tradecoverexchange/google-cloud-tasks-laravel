@@ -28,7 +28,7 @@ class MonitorCommandTest extends TestCase
         });
     }
 
-    public function testQueueWorksWithMonitorCommand()
+    public function test_queue_works_with_monitor_command()
     {
         $stats = new QueueStats();
         $cloudQueue = new Queue();

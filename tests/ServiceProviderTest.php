@@ -7,7 +7,7 @@ use TradeCoverExchange\GoogleCloudTaskLaravel\CloudTaskServiceProvider;
 
 class ServiceProviderTest extends Orchestra
 {
-    public function testPublishesTheQueueConfig()
+    public function test_publishes_the_queue_config()
     {
         $this->artisan('vendor:publish', [
             '--provider' => 'TradeCoverExchange\GoogleCloudTaskLaravel\CloudTaskServiceProvider',

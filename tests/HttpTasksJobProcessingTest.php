@@ -44,7 +44,7 @@ class HttpTasksJobProcessingTest extends Orchestra
         Carbon::setTestNow();
     }
 
-    public function testProcessesJob()
+    public function test_processes_job()
     {
         $this->configureClient();
 
@@ -65,7 +65,7 @@ class HttpTasksJobProcessingTest extends Orchestra
             ->assertNoContent();
     }
 
-    public function testProcessesJobThatAreReleasedProvidesTheCorrectStatus()
+    public function test_processes_job_that_are_released_provides_the_correct_status()
     {
         $this->mock(DispatcherFactory::class, function (MockInterface $factory) {
             $dispatcher = \Mockery::mock(HttpDispatcher::class);
@@ -108,7 +108,7 @@ class HttpTasksJobProcessingTest extends Orchestra
             ->assertStatus(Response::HTTP_PARTIAL_CONTENT);
     }
 
-    public function testUrlMiddlewareAllowsForUrlGeneration()
+    public function test_url_middleware_allows_for_url_generation()
     {
         $this->configureClient();
 
@@ -133,7 +133,7 @@ class HttpTasksJobProcessingTest extends Orchestra
         $this->assertSame('https://test.tradecoverexchange.com/test', Cache::get('test-url'));
     }
 
-    public function testFiresTaskStartedAndTaskFinishedEvents()
+    public function test_fires_task_started_and_task_finished_events()
     {
         $this->configureClient();
 
@@ -171,7 +171,7 @@ class HttpTasksJobProcessingTest extends Orchestra
         });
     }
 
-    public function testReleasesTheJobBackOntoTheQueueAfterThrowingAnExceptionInTheJob()
+    public function test_releases_the_job_back_onto_the_queue_after_throwing_an_exception_in_the_job()
     {
         $body = $this->makePayload(JobDummy::make()->mockExceptionFiring(), 1);
 
@@ -214,7 +214,7 @@ class HttpTasksJobProcessingTest extends Orchestra
             ->assertStatus(Response::HTTP_RESET_CONTENT);
     }
 
-    public function testReleasesTheJobsWithDelay()
+    public function test_releases_the_jobs_with_delay()
     {
         Carbon::setTestNow($timestamp = now());
         $body = $this->makePayload(
@@ -266,7 +266,7 @@ class HttpTasksJobProcessingTest extends Orchestra
             ->assertStatus(Response::HTTP_RESET_CONTENT);
     }
 
-    public function testTellsGoogleCloudTheTaskFailedFromTooManyTries()
+    public function test_tells_google_cloud_the_task_failed_from_too_many_tries()
     {
         $this->configureClient();
 
@@ -297,7 +297,7 @@ class HttpTasksJobProcessingTest extends Orchestra
         );
     }
 
-    public function testTellsGoogleCloudTheTaskFailedFromMarkingAsFailed()
+    public function test_tells_google_cloud_the_task_failed_from_marking_as_failed()
     {
         $this->configureClient();
 

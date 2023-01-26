@@ -39,7 +39,7 @@ class CommandsTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function testCreatingQueue()
+    public function test_creating_queue()
     {
         $this->client->shouldReceive('createQueue')
             ->with('projects/test/locations/europe-west1', \Mockery::on(function (Queue $queue) {
@@ -53,7 +53,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testDeletingQueue()
+    public function test_deleting_queue()
     {
         $this->client->shouldReceive('deleteQueue')
             ->with('projects/test/locations/europe-west1/queues/default')
@@ -66,7 +66,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testDeletingQueueWithForce()
+    public function test_deleting_queue_with_force()
     {
         $this->client->shouldReceive('deleteQueue')
             ->with('projects/test/locations/europe-west1/queues/default')
@@ -79,7 +79,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testPurgingQueue()
+    public function test_purging_queue()
     {
         $this->client->shouldReceive('purgeQueue')
             ->with('projects/test/locations/europe-west1/queues/default')
@@ -92,7 +92,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testPurgingQueueWithForce()
+    public function test_purging_queue_with_force()
     {
         $this->client->shouldReceive('purgeQueue')
             ->with('projects/test/locations/europe-west1/queues/default')
@@ -105,7 +105,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testUpdateQueue()
+    public function test_update_queue()
     {
         $this->client->shouldReceive('updateQueue')
             ->with(\Mockery::on(function (Queue $queue) {
@@ -119,7 +119,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testProvidingStats()
+    public function test_providing_stats()
     {
         Carbon::setTestNow(now());
 
@@ -159,7 +159,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testProvidesTheQueueStatus()
+    public function test_provides_the_queue_status()
     {
         $cloudQueue = new Queue();
 
@@ -183,7 +183,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testTogglesTheQueueStatus()
+    public function test_toggles_the_queue_status()
     {
         $cloudQueue = new Queue();
 
@@ -209,7 +209,7 @@ class CommandsTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function testRetrievesListOfTasks()
+    public function test_retrieves_list_of_tasks()
     {
         Carbon::setTestNow(now());
 
